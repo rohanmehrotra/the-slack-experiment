@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.post('*', async (req, res) => {
+app.post('/live', async (req, res) => {
     // We will be coding here
     console.log(req.protocol + '://' + req.get('Host') + req.url);
     let responseUrl = req.body.response_url;
