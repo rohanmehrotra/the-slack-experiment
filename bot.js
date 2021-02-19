@@ -83,7 +83,12 @@ Route: ${flight['route']}
 app.post('/ifatc', async (req, res) => {
     // We will be coding here
     console.log(req.protocol + '://' + req.get('Host') + req.url);
+
     let responseUrl = req.body.response_url;
+    res.send({
+        "response_type": "in_channel",
+        "text": "Fetching active ATC regions!"
+    })
     let configs = await masterConfigs.loadMasterConfigs();
     console.log(process.env.IF_API_KEY);
     let atc = await liveService.getATC(process.env.IF_API_KEY, configs);
