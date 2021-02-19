@@ -5,7 +5,9 @@ const liveService = require('./if_live_api_helper');
 const app = express();
 const port = process.env.PORT|| 3000;
 const axios = require('axios');
-const request = require('request')
+const request = require('request');
+const masterConfigs = require('./config_helper');
+require('dotenv').config({path: './.env'})
 // Where we will keep books
 let books = [];
 
@@ -76,6 +78,29 @@ Route: ${flight['route']}
     responseObj['text'] = response_message;
 
     axios.post(responseUrl, responseObj)
+});
+
+app.post('/ifatc', async (req, res) => {
+    // We will be coding here
+    console.log(req.protocol + '://' + req.get('Host') + req.url);
+    let responseUrl = req.body.response_url;
+    let configs = await masterConfigs.loadMasterConfigs();
+    console.log(process.env.IF_API_KEY);
+    let atc = await liveService.getATC(process.env.IF_API_KEY, configs);
+    let responseObj = {}
+    let response_message = "Here are the active ATC airports:\n";
+    responseObj['response_type'] = "in_channel";
+    let airports = Object.keys(atc);
+    for (let i = 0; i < airports.length; i++) {
+        response_message += `
+${airports[i]} - ${atc[airports[i]]['controllers']} - ${atc[airports[i]]['frequency']}
+        `
+       
+    }
+    responseObj['text'] = response_message;
+
+    axios.post(responseUrl, responseObj)
+    
 });
 
 app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
