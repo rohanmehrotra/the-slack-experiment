@@ -98,8 +98,7 @@ app.post('/ifatc', async (req, res) => {
     let airports = Object.keys(atc);
     for (let i = 0; i < airports.length; i++) {
         response_message += `
-${airports[i]} - ${atc[airports[i]]['controllers']} - ${atc[airports[i]]['frequency']}
-        `
+${airports[i]} - ${atc[airports[i]]['controllers']} - ${atc[airports[i]]['frequency']}`
        
     }
     responseObj['text'] = response_message;
