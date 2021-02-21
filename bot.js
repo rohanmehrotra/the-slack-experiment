@@ -48,8 +48,7 @@ app.post('/live', async (req, res) => {
     console.log(req.protocol + '://' + req.get('Host') + req.url);
     let responseUrl = req.body.response_url;
     res.send({
-        "response_type": "in_channel",
-        "text": "Wait for it!!!!!!!"
+        "text": "Trying to fetch your live flights."
     })
     console.log('Request received');
     let guildData = {
@@ -74,7 +73,6 @@ Route: ${flight['route']}
 
         `
     }
-    responseObj['response_type'] = "in_channel";
     responseObj['text'] = response_message;
 
     axios.post(responseUrl, responseObj)
@@ -86,7 +84,6 @@ app.post('/ifatc', async (req, res) => {
 
     let responseUrl = req.body.response_url;
     res.send({
-        "response_type": "in_channel",
         "text": "Fetching active ATC regions!"
     })
     let configs = await masterConfigs.loadMasterConfigs();
@@ -94,7 +91,7 @@ app.post('/ifatc', async (req, res) => {
     let atc = await liveService.getATC(process.env.IF_API_KEY, configs);
     let responseObj = {}
     let response_message = "Here are the active ATC airports:\n";
-    responseObj['response_type'] = "in_channel";
+    responseObj= {};
     let airports = Object.keys(atc);
     for (let i = 0; i < airports.length; i++) {
         response_message += `
