@@ -59,7 +59,6 @@ app.post('/live', async (req, res) => {
        }
    };
     var liveFlights = await liveService.getFlights(process.env.IF_API_KEY, guildData);
-    let responseObj = {}
     let response_message = "Here are your live flights:\n"
     for(flight of liveFlights){
         response_message += `
@@ -73,7 +72,9 @@ Route: ${flight['route']}
 
         `
     }
-    responseObj['text'] = response_message;
+    let responseObj = {
+        text: response_message
+    }
 
     axios.post(responseUrl, responseObj)
 });
