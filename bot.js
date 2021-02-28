@@ -125,6 +125,7 @@ app.post('/stats', async (req, res) => {
 Username: ${userStats.discourseUsername}
 VA/VO Affiliation: ${userStats.virtualOrganization}
 XP: ${userStats.xp}
+Grade: ${userStats.grade}
 Flight Time: ${hours.toString()}:${minutes.toString()}
 Level 1 Vios: ${userStats['violationCountByLevel']['level1']}
 Level 2 Vios: ${userStats['violationCountByLevel']['level2']}
