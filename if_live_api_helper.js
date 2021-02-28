@@ -109,3 +109,27 @@ async function getFrequencyType(freqInt){
         return 'U';
     }
 }
+
+exports.getUserStats = async function(ifApiKey, username){
+    let configs = await masterConfigs.loadMasterConfigs();
+    const user = await axios.post(`${configs["IF_API_URL"]}/user/stats?apikey=${ifApiKey}`, {
+        discourseNames: [username]
+    });
+    let response = {};
+    let result = user.data['result'];
+    if(result.length > 0) response = result[0];
+    return response;
+}
+
+exports.getATIS = async function(airportIcao, ifApiKey){
+    let configs = await masterConfigs.loadMasterConfigs();
+    let sessionId = await getSession(ifApiKey, configs);
+    let atisResponse = "";
+    try{
+    let atis = await axios.get(`${configs['IF_API_URL']}/airport/${airportIcao}/atis/${sessionId['id']}?apikey=${ifApiKey}`)
+    atisResponse = atis.data['result'];
+    return atisResponse;
+    }catch{
+        return atisResponse;
+    }
+}
