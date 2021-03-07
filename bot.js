@@ -84,9 +84,9 @@ app.post('/ifatc', async (req, res) => {
     console.log(req.protocol + '://' + req.get('Host') + req.url);
 
     let responseUrl = req.body.response_url;
-    res.send({
-        "text": "Fetching active ATC regions!"
-    })
+    // res.send({
+    //     "text": "Fetching active ATC regions!"
+    // })
     let configs = await masterConfigs.loadMasterConfigs();
     let atc = await liveService.getATC(process.env.IF_API_KEY, configs);
     let responseObj = {}
@@ -99,7 +99,6 @@ ${airports[i]} - ${atc[airports[i]]['controllers']} - ${atc[airports[i]]['freque
 
     }
     responseObj['text'] = response_message;
-
     axios.post(responseUrl, responseObj)
 
 });
