@@ -147,16 +147,16 @@ exports.getMetar = async function getMetar(icao) {
     let data = await axios.get(url, config = config)
     console.log(Object.keys(data.data));
     let responseMessage = `
-    METAR: ${data.data.sanitized}
-    Altimeter: ${data.data.altimeter.value}
-    Clouds: ${data.data.clouds.length ? data.data.clouds[0].value : '-'}
-    Flight Rules ${data.data.flight_rules}
-    Visibility: ${data.data.visibility.value}
-    Winds: ${data.data.wind_speed.value + "kts. @ " + data.data.wind_direction.value + "." }
-    Remarks: ${data.data.remarks}
-    Temperature: ${data.data.temperature.value}
-    Dewpoint: ${data.data.dewpoint.value}
-    Time: ${data.data.time.dt}
+METAR: ${data.data.sanitized}
+Altimeter: ${data.data.altimeter.value}
+Clouds: ${data.data.clouds.length ? data.data.clouds[0].value : '-'}
+Flight Rules ${data.data.flight_rules}
+Visibility: ${data.data.visibility.value}
+Winds: ${data.data.wind_speed.value + "kts. @ " + data.data.wind_direction.value + "." }
+Remarks: ${data.data.remarks}
+Temperature: ${data.data.temperature.value}
+Dewpoint: ${data.data.dewpoint.value}
+Time: ${data.data.time.dt}
     `
     return responseMessage
 }
