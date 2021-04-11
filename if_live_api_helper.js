@@ -33,24 +33,24 @@ async function getAllFlights(sessionId, ifApiUrl, ifApiKey, callsignPattern) {
     return filteredFlights;
 }
 
-async function getAllFlightPlans(ifApiUrl, ifApiKey, sessionId, vaFLights){
+async function getAllFlightPlans(ifApiUrl, ifApiKey, sessionId, vaFLights) {
     let aircraft_datastore = await masterConfigs.readAircraftDatastore();
     let responseObj = []
     let flightPlans = await axios.get(`${ifApiUrl}/flightplans/${sessionId}?apikey=${ifApiKey}`)
-    for(let i = 0; i < vaFLights.length; i++){
+    for (let i = 0; i < vaFLights.length; i++) {
         let route = 'No FPL Found';
         let livery = '';
         let aircraft = '';
-        let username = (vaFLights[i]['username'] === null)? "IFC Not linked" : vaFLights[i]['username'];
+        let username = (vaFLights[i]['username'] === null) ? "IFC Not linked" : vaFLights[i]['username'];
 
-        for(let j = 0; j < flightPlans.data.result.length; j++){
-            if(vaFLights[i]['flightId'] === flightPlans.data.result[j]['flightId']){
-                if(flightPlans.data.result[j].waypoints.length === 0) break;
+        for (let j = 0; j < flightPlans.data.result.length; j++) {
+            if (vaFLights[i]['flightId'] === flightPlans.data.result[j]['flightId']) {
+                if (flightPlans.data.result[j].waypoints.length === 0) break;
                 route = flightPlans.data.result[j].waypoints[0] + '-' + flightPlans.data.result[j].waypoints[flightPlans.data.result[j].waypoints.length - 1]
             }
         }
-        for(let j = 0; j < aircraft_datastore.length; j++){
-            if(aircraft_datastore[j]['AircraftId'] === vaFLights[i]['aircraftId'] && aircraft_datastore[j]['LiveryId'] === vaFLights[i]['liveryId']){
+        for (let j = 0; j < aircraft_datastore.length; j++) {
+            if (aircraft_datastore[j]['AircraftId'] === vaFLights[i]['aircraftId'] && aircraft_datastore[j]['LiveryId'] === vaFLights[i]['liveryId']) {
                 aircraft = aircraft_datastore[j]['AircraftName'];
                 livery = aircraft_datastore[j]['LiveryName'];
             }
@@ -58,17 +58,17 @@ async function getAllFlightPlans(ifApiUrl, ifApiKey, sessionId, vaFLights){
         responseObj.push({
             username: username,
             callsign: vaFLights[i]['callsign'],
-            altitude:( (Math.round(vaFLights[i]['altitude']/100))*100).toString()+'ft',
+            altitude: ((Math.round(vaFLights[i]['altitude'] / 100)) * 100).toString() + 'ft',
             gs: (Math.round(vaFLights[i]['speed'])).toString() + 'kts',
             aircraft: aircraft,
             livery: livery,
             route: route
         })
-        
+
     }
     return responseObj;
 }
-exports.getATC = async function(ifApiKey, masterConfigs){
+exports.getATC = async function (ifApiKey, masterConfigs) {
     let sessionId = await getSession(ifApiKey, masterConfigs);
     console.log(`${masterConfigs['IF_API_URL']}/atc/${sessionId['id']}?apikey=${ifApiKey}`);
     let allAtc = await axios.get(`${masterConfigs['IF_API_URL']}/atc/${sessionId['id']}?apikey=${ifApiKey}`);
@@ -76,25 +76,25 @@ exports.getATC = async function(ifApiKey, masterConfigs){
     return groupedData;
 }
 
-async function groupATCjson(jsonObj){
+async function groupATCjson(jsonObj) {
     let airports = {}
-    for(let i = 0; i< jsonObj.length; i++){
+    for (let i = 0; i < jsonObj.length; i++) {
         let airportName = jsonObj[i]['airportName'];
-        if(airportName === null) airportName = 'Unknown';
+        if (airportName === null) airportName = 'Unknown';
         //console.log(airportName, airportName in airports);
-        if(airportName in airports){
-            if(! airports[airportName]['controllers'].includes(jsonObj[i]['username'])) airports[airportName]['controllers'] += ( ', ' + jsonObj[i]['username']);
+        if (airportName in airports) {
+            if (!airports[airportName]['controllers'].includes(jsonObj[i]['username'])) airports[airportName]['controllers'] += (', ' + jsonObj[i]['username']);
             airports[airportName]['frequency'] += (await getFrequencyType(jsonObj[i]['type']));
-        }else{
+        } else {
 
-            airports[airportName] = {'controllers' : (jsonObj[i]['username'] === undefined || jsonObj[i]['username'] === null) ? 'xxx' : jsonObj[i]['username']};
+            airports[airportName] = { 'controllers': (jsonObj[i]['username'] === undefined || jsonObj[i]['username'] === null) ? 'xxx' : jsonObj[i]['username'] };
             airports[airportName]['frequency'] = (await getFrequencyType(jsonObj[i]['type']));
         }
     }
     return airports;
 }
 
-async function getFrequencyType(freqInt){
+async function getFrequencyType(freqInt) {
     const freq = {
         '0': 'G',
         '1': 'T',
@@ -103,33 +103,60 @@ async function getFrequencyType(freqInt){
         '6': 'C',
         '7': 'S'
     }
-    if(freqInt.toString() in freq){
+    if (freqInt.toString() in freq) {
         return freq[freqInt.toString()];
-    }else{
+    } else {
         return 'U';
     }
 }
 
-exports.getUserStats = async function(ifApiKey, username){
+exports.getUserStats = async function (ifApiKey, username) {
     let configs = await masterConfigs.loadMasterConfigs();
     const user = await axios.post(`${configs["IF_API_URL"]}/user/stats?apikey=${ifApiKey}`, {
         discourseNames: [username]
     });
     let response = {};
     let result = user.data['result'];
-    if(result.length > 0) response = result[0];
+    if (result.length > 0) response = result[0];
     return response;
 }
 
-exports.getATIS = async function(airportIcao, ifApiKey){
+exports.getATIS = async function (airportIcao, ifApiKey) {
     let configs = await masterConfigs.loadMasterConfigs();
     let sessionId = await getSession(ifApiKey, configs);
     let atisResponse = "";
-    try{
-    let atis = await axios.get(`${configs['IF_API_URL']}/airport/${airportIcao}/atis/${sessionId['id']}?apikey=${ifApiKey}`)
-    atisResponse = atis.data['result'];
-    return atisResponse;
-    }catch{
+    try {
+        let atis = await axios.get(`${configs['IF_API_URL']}/airport/${airportIcao}/atis/${sessionId['id']}?apikey=${ifApiKey}`)
+        atisResponse = atis.data['result'];
+        return atisResponse;
+    } catch {
         return atisResponse;
     }
+}
+
+exports.getMetar = async function getMetar(icao) {
+    let avwx = `Token WBeBM4-Mq8g-AuXrdFWfdA9ZXEuUrvBFe_Gdi8Yj1E8`
+    let url = `https://avwx.rest/api/metar/${icao}?options=&reporting=true&format=json&onfail=cache`
+    let config = {
+        headers: {
+            Authorization: avwx
+        }
+    }
+    console.log(icao)
+    console.log(url)
+    let data = await axios.get(url, config = config)
+    console.log(Object.keys(data.data));
+    let responseMessage = `
+    METAR: ${data.data.sanitized}
+    Altimeter: ${data.data.altimeter.value}
+    Clouds: ${data.data.clouds.length ? data.data.clouds[0].value : '-'}
+    Flight Rules ${data.data.flight_rules}
+    Visibility: ${data.data.visibility.value}
+    Winds: ${data.data.wind_speed.value + "kts. @ " + data.data.wind_direction.value + "." }
+    Remarks: ${data.data.remarks}
+    Temperature: ${data.data.temperature.value}
+    Dewpoint: ${data.data.dewpoint.value}
+    Time: ${data.data.time.dt}
+    `
+    return responseMessage
 }

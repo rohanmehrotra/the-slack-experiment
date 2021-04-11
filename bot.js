@@ -162,4 +162,27 @@ app.post('/atis', async (req, res) => {
     console.log(icao, atisInfo)
 
 });
+
+app.post('/metar', async (req, res) => {
+    let responseUrl = req.body.response_url;
+    let icao = req.body.text;
+    res.send({
+        text: "Trying to fetch the METAR of the desired airport."
+    });
+    let atisInfo = await liveService.getMetar(
+        icao
+    );
+    console.log(atisInfo);
+    if(atisInfo === ""){
+        axios.post(responseUrl, {
+            text: "Sorry! I was unable to fetch the desired airport's ATIS information! The airport might not be active currently."
+        })
+    }else{
+        axios.post(responseUrl, {
+            text: atisInfo
+        })
+    }
+    console.log(icao, atisInfo)
+
+});
 app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
